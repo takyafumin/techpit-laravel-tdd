@@ -1,0 +1,6 @@
+{
+    "laravel_goto_view.folders": {
+        "default": "/app/resources/views",
+        "theme_xxx": "/app/resources/views/theme_xxx"
+    }
+}
