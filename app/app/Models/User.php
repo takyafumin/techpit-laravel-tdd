@@ -41,4 +41,27 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * 予約可能であるか
+     *
+     * @param int $remainingCount 空き数
+     * @param int $reservationCount 今月の予約数
+     * @return bool 判定結果
+     */
+    public function canReserve(
+        int $remainingCount,
+        int $reservationCount
+    ): bool
+    {
+        if ($remainingCount === 0) {
+            return false;
+        }
+
+        if ($this->plan === 'gold') {
+            return true;
+        }
+
+        return $reservationCount < 5;
+    }
 }
