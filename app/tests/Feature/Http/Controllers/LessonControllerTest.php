@@ -37,6 +37,9 @@ class LessonControllerTest extends TestCase
         }
 
         // exec
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
         $response = $this->get("/lessons/{$lesson->id}");
 
         // assert
