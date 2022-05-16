@@ -74,8 +74,8 @@ services:
     environment:
       - MYSQL_DATABASE=${DB_TESTING_DATABASE}
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_USER=${DB_USERNAME}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USER=${DB_TESTING_USERNAME}
+      - MYSQL_PASSWORD=${DB_TESTING_PASSWORD}
       - TZ=${TZ}
     networks:
       - nw_tdd

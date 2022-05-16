@@ -30,7 +30,7 @@ class Lesson extends Model
      *
      * @return int 空き数
      */
-    private function remainingCount(): int
+    public function remainingCount(): int
     {
         return $this->capacity - $this->reservations()->count();
     }
