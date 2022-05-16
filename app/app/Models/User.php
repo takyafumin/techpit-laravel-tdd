@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -43,25 +45,44 @@ class User extends Authenticatable
     ];
 
     /**
+     * @return HasMany
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    /**
      * 予約可能であるか
      *
-     * @param int $remainingCount 空き数
-     * @param int $reservationCount 今月の予約数
      * @return bool 判定結果
      */
-    public function canReserve(
-        int $remainingCount,
-        int $reservationCount
-    ): bool
+    public function canReserve(Lesson $lesson): void
     {
-        if ($remainingCount === 0) {
-            return false;
+        if ($lesson->remainingCount() === 0) {
+            throw new Exception('レッスンの予約可能上限に達しています。');
         }
 
         if ($this->plan === 'gold') {
-            return true;
+            return;
         }
 
-        return $reservationCount < 5;
+        if ($this->reservationCountThisMonth() === 5) {
+            throw new Exception('今月の予約がプランの上限に達しています。');
+        }
+    }
+
+    /**
+     * 当月の予約数を返却する
+     *
+     * @return int 当月の予約数
+     */
+    public function reservationCountThisMonth(): int
+    {
+        $today = Carbon::today();
+        return $this->reservations()
+            ->whereYear('created_at', $today->year)
+            ->whereMonth('created_at', $today->month)
+            ->count();
     }
 }
