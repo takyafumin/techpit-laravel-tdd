@@ -18,25 +18,8 @@ Requirement(依存)
 How To Use(使い方)
 ----------
 
-環境設定ファイルを作成し, docker環境を構築します
-
 ```bash
-# 環境設定ファイルをコピーして作成
-cp docker/.env.example docker/.env
-cp app/.env.example app/.env
-
-
-cd docker
-
-# containerのbuild & up
-docker-compose up -d
-
-# composer install
-docker-compose exec app composer install
-
-# db migration
-docker-compose exec php artisan migrate
-docker-compose exec php artisan migrate --database=mysql_testing
+./run.sh init
 ```
 
 
@@ -58,7 +41,8 @@ Structure(ディレクトリ構造)
 ```bash
 .
 +----- app/                     # Laravel Application
-+----- docker/                  # Docker
+|  |
+|  +----- docker/               # Docker
 |  |
 |  +---- docker-compose
 |
