@@ -8,11 +8,13 @@ use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
+use Tests\Factories\Traits\CreatesUser;
 use Tests\TestCase;
 
 class LessonControllerTest extends TestCase
 {
     use RefreshDatabase;
+    use CreatesUser;
 
     /**
      * @param int $capacity 空き数
@@ -40,8 +42,7 @@ class LessonControllerTest extends TestCase
 
         // exec
         /** @var User $user */
-        $user = User::factory()->create();
-        UserProfile::factory()->create(['user_id' => $user->id]);
+        $user = $this->createUser();
         $this->actingAs($user);
         $response = $this->get("/lessons/{$lesson->id}");
 
