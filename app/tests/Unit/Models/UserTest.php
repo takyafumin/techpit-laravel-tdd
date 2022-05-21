@@ -3,8 +3,8 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Lesson;
+use App\Models\UserProfile;
 use App\Models\User;
-use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
@@ -27,7 +27,8 @@ class UserTest extends TestCase
         $user = $this->partialMock(User::class, function (MockInterface $mock) use ($reservationCount) {
             $mock->shouldReceive('reservationCountThisMonth')->andReturn($reservationCount);
         });
-        $user->plan = $plan;
+        $user->profile = new UserProfile();
+        $user->profile->plan = $plan;
 
         /** @var Lesson $lesson */
         $lesson = $this->mock(Lesson::class, function (MockInterface $mock) use ($remainingCount) {
@@ -78,7 +79,8 @@ class UserTest extends TestCase
         $user = $this->partialMock(User::class, function (MockInterface $mock) use ($reservationCount) {
             $mock->shouldReceive('reservationCountThisMonth')->andReturn($reservationCount);
         });
-        $user->plan = $plan;
+        $user->profile = new UserProfile();
+        $user->profile->plan = $plan;
 
         /** @var Lesson $lesson */
         $lesson = $this->mock(Lesson::class, function (MockInterface $mock) use ($remainingCount) {

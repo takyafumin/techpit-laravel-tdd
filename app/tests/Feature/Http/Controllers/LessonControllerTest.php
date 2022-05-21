@@ -3,30 +3,31 @@
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\Lesson;
+use App\Models\UserProfile;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
-use LogicException;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
-use SebastianBergmann\RecursionContext\InvalidArgumentException;
-use PHPUnit\Framework\ExpectationFailedException;
+use Tests\Factories\Traits\CreatesUser;
 use Tests\TestCase;
 
 class LessonControllerTest extends TestCase
 {
     use RefreshDatabase;
+    use CreatesUser;
 
     /**
      * @param int $capacity 空き数
      * @param int $reservationCount 予約数
      * @param string $expectedVacancyLevelMark 期待値
+     * @param string $button ボタンHTML文字列
      * @dataProvider dataShow
      */
     public function testShow(
         int $capacity,
         int $reservationCount,
-        string $expectedVacancyLevelMark
+        string $expectedVacancyLevelMark,
+        string $button
     ) {
         // setup
         $lesson = Lesson::factory()->create([
@@ -35,35 +36,46 @@ class LessonControllerTest extends TestCase
         ]);
         for ($i = 0; $i < $reservationCount; $i++) {
             $user = User::factory()->create();
-            $lesson->reservations()->save(Reservation::factory()->make(['user_id' => $user]));
+            UserProfile::factory()->create(['user_id' => $user->id]);
+            Reservation::factory()->create(['lesson_id' => $lesson->id, 'user_id' => $user->id]);
         }
 
         // exec
+        /** @var User $user */
+        $user = $this->createUser();
+        $this->actingAs($user);
         $response = $this->get("/lessons/{$lesson->id}");
 
         // assert
         $response->assertStatus(Response::HTTP_OK);
         $response->assertSee("$lesson->name");
-        $response->assertSee($expectedVacancyLevelMark);
+        $response->assertSee("空き状況: {$expectedVacancyLevelMark}");
+        $response->assertSee($button, false);
     }
 
     public function dataShow()
     {
+        $button = '<button class="btn btn-primary">このレッスンを予約する</button>';
+        $span   = '<span class="btn btn-primary disabled">予約できません</span>';
+
         return [
             '空き十分' => [
                 'capacity'                 => 6,
                 'reservationCount'         => 1,
                 'expectedVacancyLevelMark' => '◎',
+                'button'                   => $button,
             ],
             '空きわずか' => [
                 'capacity'                 => 6,
                 'reservationCount'         => 2,
                 'expectedVacancyLevelMark' => '△',
+                'button'                   => $button,
             ],
             '空きなし' => [
                 'capacity'                 => 6,
                 'reservationCount'         => 6,
                 'expectedVacancyLevelMark' => '×',
+                'button'                   => $span,
             ],
         ];
     }

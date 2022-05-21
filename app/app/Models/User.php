@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -45,6 +46,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * @return HasOne
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    /**
      * @return HasMany
      */
     public function reservations(): HasMany
@@ -63,7 +72,7 @@ class User extends Authenticatable
             throw new Exception('レッスンの予約可能上限に達しています。');
         }
 
-        if ($this->plan === 'gold') {
+        if ($this->profile->plan === 'gold') {
             return;
         }
 
