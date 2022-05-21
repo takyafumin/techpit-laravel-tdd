@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Lesson\ReserveController;
 use App\Http\Controllers\LessonController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -25,4 +26,5 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::middleware('auth')->group(function() {
     Route::get('/lessons/{lesson}', [LessonController::class, 'show'])->name('lessons.show');
+    Route::post('/lessons/{lesson}/reserve', [ReserveController::class, '__invoke'])->name('lessons.reserve');
 });
