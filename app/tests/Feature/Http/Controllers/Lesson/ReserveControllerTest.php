@@ -4,9 +4,10 @@ namespace Tests\Feature\Http\Controllers\Lesson;
 
 use App\Models\Lesson;
 use App\Models\Reservation;
+use App\Notifications\ReservationCompleted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Notification;
 use Tests\Factories\Traits\CreatesUser;
 use Tests\TestCase;
 
@@ -18,6 +19,7 @@ class ReserveControllerTest extends TestCase
     public function test__invoke()
     {
         // Arrange
+        Notification::fake();
         $lesson = Lesson::factory()->create();
         $user = $this->createUser();
         $this->actingAs($user);
@@ -32,11 +34,19 @@ class ReserveControllerTest extends TestCase
             'lesson_id' => $lesson->id,
             'user_id'   => $user->id,
         ]);
+        Notification::assertSentTo(
+            $user,
+            ReservationCompleted::class,
+            function (ReservationCompleted $notification) use ($lesson) {
+                return $notification->lesson->id === $lesson->id;
+            }
+        );
     }
 
     public function test__invoke_異常系()
     {
         // Arrange
+        Notification::fake();
         /** @var Lesson $lesson */
         $lesson = Lesson::factory()->create(['capacity' => 1]);
         $anotherUser = $this->createUser();
@@ -61,5 +71,6 @@ class ReserveControllerTest extends TestCase
             'lesson_id' => $lesson->id,
             'user_id'   => $user->id,
         ]);
+        Notification::assertNotSentTo($user, ReservationCompleted::class);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Notifications\ReservationCompleted;
 use Illuminate\Support\Facades\Auth;
 
 class ReserveController extends Controller
@@ -25,9 +26,13 @@ class ReserveController extends Controller
         } catch (\Throwable $e) {
             return back()->withErrors('予約できません。:'. $e->getMessage());
         }
-        Reservation::create(['lesson_id' => $lesson->id, 'user_id' => $user->id]);
 
         // 予約
+        Reservation::create(['lesson_id' => $lesson->id, 'user_id' => $user->id]);
+
+        // イベント
+        $user->notify(new ReservationCompleted($lesson));
+
         return redirect()->route('lessons.show', ['lesson' => $lesson]);
     }
 }
